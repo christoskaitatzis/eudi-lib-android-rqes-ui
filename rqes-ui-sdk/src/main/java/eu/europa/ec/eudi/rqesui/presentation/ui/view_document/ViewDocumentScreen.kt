@@ -32,7 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import eu.europa.ec.eudi.rqesui.domain.extension.toUri
+import eu.europa.ec.eudi.rqesui.domain.util.safeLet
 import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentData
+import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentFileType
 import eu.europa.ec.eudi.rqesui.infrastructure.theme.values.ThemeColors
 import eu.europa.ec.eudi.rqesui.infrastructure.theme.values.divider
 import eu.europa.ec.eudi.rqesui.presentation.entities.config.ViewDocumentUiConfig
@@ -46,6 +48,7 @@ import eu.europa.ec.eudi.rqesui.presentation.ui.component.pdf.PdfViewer
 import eu.europa.ec.eudi.rqesui.presentation.ui.component.preview.PreviewTheme
 import eu.europa.ec.eudi.rqesui.presentation.ui.component.preview.ThemeModePreviews
 import eu.europa.ec.eudi.rqesui.presentation.ui.component.utils.SPACING_LARGE
+import eu.europa.ec.eudi.rqesui.presentation.ui.component.viewer.SimpleFileViewer
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -62,14 +65,15 @@ internal fun ViewDocumentScreen(
 
     ContentScreen(
         isLoading = state.isLoading,
-        toolBarConfig = rememberToolbarConfig(
+        toolBarConfig =
+        rememberToolbarConfig(
             isSigned = state.config.isSigned,
-            documentName = state.config.documentData.documentName
+            documentName = state.config.documentData.documentName,
         ),
         navigatableAction = ScreenNavigateAction.BACKABLE,
         onBack = {
             viewModel.setEvent(Event.Pop)
-        }
+        },
     ) { paddingValues ->
         Content(
             state = state,
@@ -95,85 +99,111 @@ private fun Content(
     paddingValues: PaddingValues,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.divider)
             .padding(top = paddingValues.calculateTopPadding()),
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
     ) {
-        state.config.documentData.let { file ->
+        safeLet(
+            state.config.documentData,
+            state.config.fileTypeExtension
+        ) { documentData, fileTypeExtension ->
             Box(modifier = Modifier.fillMaxSize()) {
-                PdfViewer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = SPACING_LARGE.dp),
-                    documentUri = file.uri,
-                    onLoadingListener = { isLoading ->
-                        onEventSend(
-                            Event.LoadingStateChanged(isLoading = isLoading)
+
+                when (fileTypeExtension) {
+                    DocumentFileType.PDF -> {
+                        PdfViewer(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = SPACING_LARGE.dp),
+                            documentUri = documentData.uri,
+                            onLoadingListener = { isLoading ->
+                                onEventSend(
+                                    Event.LoadingStateChanged(isLoading = isLoading)
+                                )
+                            }
                         )
                     }
-                )
+
+                    DocumentFileType.JSON,
+                    DocumentFileType.XML,
+                    DocumentFileType.UNKNOWN -> {
+                        onEventSend(Event.LoadingStateChanged(false))
+                        SimpleFileViewer(
+                            simpleFileUri = documentData.uri,
+                            fileType = fileTypeExtension
+                        )
+                    }
+                }
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        effectFlow.onEach { effect ->
-            when (effect) {
-                is Effect.Navigation -> onNavigationRequested(effect)
-            }
-        }.collect()
+        effectFlow
+            .onEach { effect ->
+                when (effect) {
+                    is Effect.Navigation -> onNavigationRequested(effect)
+                }
+            }.collect()
     }
 }
+
+
 
 @Composable
 private fun rememberToolbarConfig(
     isSigned: Boolean,
-    documentName: String
-): ToolbarConfig {
-    return remember(isSigned, documentName) {
-        val toolbarActions = if (isSigned) {
-            listOf(
-                ToolbarAction(
-                    icon = AppIcons.Verified,
-                    customTint = ThemeColors.success,
-                    clickable = false,
-                    onClick = {}
+    documentName: String,
+): ToolbarConfig =
+    remember(isSigned, documentName) {
+        val toolbarActions =
+            if (isSigned) {
+                listOf(
+                    ToolbarAction(
+                        icon = AppIcons.Verified,
+                        customTint = ThemeColors.success,
+                        clickable = false,
+                        onClick = {},
+                    ),
                 )
-            )
-        } else {
-            emptyList()
-        }
+            } else {
+                emptyList()
+            }
 
         ToolbarConfig(
             title = documentName,
             actions = toolbarActions,
-            hasShadow = true
+            hasShadow = true,
         )
     }
-}
 
 @ThemeModePreviews
 @Composable
 private fun ViewDocumentScreenPreview() {
     PreviewTheme {
         Content(
-            state = State(
+            state =
+            State(
                 isLoading = false,
-                config = ViewDocumentUiConfig(
+                config =
+                ViewDocumentUiConfig(
                     isSigned = true,
-                    documentData = DocumentData(
+                    documentData =
+                    DocumentData(
                         documentName = "Document.pdf",
-                        uri = "uriPath".toUri()
-                    )
+                        uri = "uriPath".toUri(),
+                    ),
+                    fileTypeExtension = DocumentFileType.PDF
                 ),
-                buttonText = "Close"
+                buttonText = "Close",
             ),
             effectFlow = Channel<Effect>().receiveAsFlow(),
             onEventSend = {},
             onNavigationRequested = {},
-            paddingValues = PaddingValues()
+            paddingValues = PaddingValues(),
         )
     }
 }

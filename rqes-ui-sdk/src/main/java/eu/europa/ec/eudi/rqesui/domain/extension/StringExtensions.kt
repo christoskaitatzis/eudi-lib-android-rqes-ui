@@ -19,6 +19,7 @@ package eu.europa.ec.eudi.rqesui.domain.extension
 import android.net.Uri
 import android.util.Base64
 import eu.europa.ec.eudi.rqesui.domain.entities.localization.LocalizableKey
+import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentFileType
 
 /**
  * Formats a string by replacing placeholders with provided arguments.
@@ -76,4 +77,19 @@ fun String.toUri(): Uri = try {
     Uri.parse(this)
 } catch (e: Exception) {
     Uri.EMPTY
+}
+
+/**
+ * Gets the file name extension from the given string.
+ * @return A [FileType] object of the file name extension,
+ * or an empty string if none is found.
+ */
+internal fun String.getFileNameExtension(): DocumentFileType {
+    val extension = this.substringAfterLast(".", "")
+    return when {
+        extension.equals(DocumentFileType.PDF.typeSuffix, ignoreCase = true) -> DocumentFileType.PDF
+        extension.equals(DocumentFileType.XML.typeSuffix, ignoreCase = true) -> DocumentFileType.XML
+        extension.equals(DocumentFileType.JSON.typeSuffix, ignoreCase = true) -> DocumentFileType.JSON
+        else -> DocumentFileType.UNKNOWN
+    }
 }

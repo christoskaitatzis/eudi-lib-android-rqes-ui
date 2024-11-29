@@ -23,10 +23,12 @@ import eu.europa.ec.eudi.rqesui.domain.serializer.UiSerializable
 import eu.europa.ec.eudi.rqesui.domain.serializer.UiSerializableParser
 import eu.europa.ec.eudi.rqesui.domain.serializer.adapter.UriTypeAdapter
 import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentData
+import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentFileType
 
 internal data class ViewDocumentUiConfig(
     val isSigned: Boolean,
     val documentData: DocumentData,
+    val fileTypeExtension: DocumentFileType
 ) : UiSerializable {
 
     companion object Parser : UiSerializableParser {

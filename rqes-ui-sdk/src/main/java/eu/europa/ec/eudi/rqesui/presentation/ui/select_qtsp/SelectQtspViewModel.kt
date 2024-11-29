@@ -24,6 +24,7 @@ import eu.europa.ec.eudi.rqesui.domain.controller.EudiRqesGetSelectedFilePartial
 import eu.europa.ec.eudi.rqesui.domain.controller.EudiRqesGetServiceAuthorizationUrlPartialState
 import eu.europa.ec.eudi.rqesui.domain.controller.EudiRqesSetSelectedQtspPartialState
 import eu.europa.ec.eudi.rqesui.domain.entities.localization.LocalizableKey
+import eu.europa.ec.eudi.rqesui.domain.extension.getFileNameExtension
 import eu.europa.ec.eudi.rqesui.domain.interactor.SelectQtspInteractor
 import eu.europa.ec.eudi.rqesui.domain.serializer.UiSerializer
 import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentData
@@ -318,7 +319,8 @@ internal class SelectQtspViewModel(
                     ViewDocumentUiConfig.serializedKeyName to uiSerializer.toBase64(
                         model = ViewDocumentUiConfig(
                             isSigned = false,
-                            documentData = documentData
+                            documentData = documentData,
+                            fileTypeExtension = documentData.documentName.getFileNameExtension()
                         ),
                         parser = ViewDocumentUiConfig.Parser
                     )

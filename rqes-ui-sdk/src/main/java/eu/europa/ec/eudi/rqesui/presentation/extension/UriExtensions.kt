@@ -16,10 +16,14 @@
 
 package eu.europa.ec.eudi.rqesui.presentation.extension
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import eu.europa.ec.eudi.rqesui.domain.entities.error.EudiRQESUiError
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
 /**
  * Retrieves the file name from a given [Uri].
@@ -42,5 +46,26 @@ internal fun Uri.getFileName(context: Context): Result<String> {
         Result.failure(EudiRQESUiError(message = "Unable to determine file name"))
     } else {
         Result.success(fileName)
+    }
+}
+
+internal fun Uri.readTextFromUri(context: Context): String? {
+    val contentResolver: ContentResolver = context.contentResolver
+    return try {
+        val inputStream = contentResolver.openInputStream(this)
+        inputStream?.let { stream ->
+            val reader = BufferedReader(InputStreamReader(stream))
+            val stringBuilder = StringBuilder()
+            var line: String?
+
+            while (reader.readLine().also { line = it } != null) {
+                stringBuilder.append(line).append("\n")
+            }
+            reader.close()
+            stringBuilder.toString()
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
     }
 }

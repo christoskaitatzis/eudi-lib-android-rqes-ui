@@ -20,6 +20,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import eu.europa.ec.eudi.rqesui.domain.entities.localization.LocalizableKey
+import eu.europa.ec.eudi.rqesui.domain.extension.getFileNameExtension
 import eu.europa.ec.eudi.rqesui.domain.interactor.SuccessInteractor
 import eu.europa.ec.eudi.rqesui.domain.interactor.SuccessInteractorGetSelectedFileAndQtspPartialState
 import eu.europa.ec.eudi.rqesui.domain.interactor.SuccessInteractorSignAndSaveDocumentPartialState
@@ -281,7 +282,8 @@ internal class SuccessViewModel(
                     ViewDocumentUiConfig.serializedKeyName to uiSerializer.toBase64(
                         model = ViewDocumentUiConfig(
                             isSigned = true,
-                            documentData = documentData
+                            documentData = documentData,
+                            fileTypeExtension = documentData.documentName.getFileNameExtension()
                         ),
                         parser = ViewDocumentUiConfig.Parser
                     )

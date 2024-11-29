@@ -110,7 +110,7 @@ private fun Content(padding: PaddingValues) {
                 Button(
                     onClick = {
                         selectPdfLauncher.launch(
-                            arrayOf("application/pdf")
+                            arrayOf("application/pdf", "application/json", "text/xml")
                         )
                     }
                 ) {

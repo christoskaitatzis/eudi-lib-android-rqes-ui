@@ -25,3 +25,10 @@ internal data class DocumentData(
     val documentName: String,
     val uri: Uri,
 ) : Parcelable
+
+internal enum class DocumentFileType(val typeSuffix: String) {
+    PDF("PDF"),
+    JSON("JSON"),
+    XML("XML"),
+    UNKNOWN("")
+}

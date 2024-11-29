@@ -100,6 +100,8 @@ dependencies {
 
     //Gson
     implementation(libs.gson)
+    //Jdom
+    implementation(libs.jdom2)
 
     // Test Dependencies
     testImplementation(libs.junit)
