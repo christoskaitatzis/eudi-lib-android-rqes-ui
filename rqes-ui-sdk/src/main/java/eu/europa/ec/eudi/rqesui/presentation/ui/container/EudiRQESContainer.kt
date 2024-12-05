@@ -17,9 +17,13 @@
 package eu.europa.ec.eudi.rqesui.presentation.ui.container
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresExtension
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,10 +43,12 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.annotation.KoinExperimentalAPI
 
-internal class EudiRQESContainer : ComponentActivity() {
+internal class EudiRQESContainer : AppCompatActivity() {
 
     private val routerHost: RouterHost by inject()
 
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

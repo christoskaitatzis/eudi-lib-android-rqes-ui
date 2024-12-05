@@ -14,12 +14,14 @@
   ~ governing permissions and limitations under the Licence.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-sdk tools:overrideLibrary="androidx.pdf.viewer.fragment, androidx.pdf" />
 
     <application>
-        <activity
+    <activity
             android:name=".presentation.ui.container.EudiRQESContainer"
             android:exported="true"
             android:launchMode="singleTask"

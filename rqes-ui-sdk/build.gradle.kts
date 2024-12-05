@@ -86,6 +86,10 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.androidx.security)
 
+    // Pdf
+    implementation(libs.androidx.pdf.viewer)
+    implementation(libs.pdf.viewer.fragment)
+
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

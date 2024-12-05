@@ -16,6 +16,10 @@
 
 package eu.europa.ec.eudi.rqesui.presentation.ui.view_document
 
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavController
+import androidx.pdf.viewer.fragment.PdfViewerFragment
 import eu.europa.ec.eudi.rqesui.domain.extension.toUri
 import eu.europa.ec.eudi.rqesui.infrastructure.config.data.DocumentData
 import eu.europa.ec.eudi.rqesui.infrastructure.theme.values.ThemeColors
@@ -52,6 +61,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 internal fun ViewDocumentScreen(
     navController: NavController,
@@ -86,6 +97,7 @@ internal fun ViewDocumentScreen(
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
 @Composable
 private fun Content(
     state: State,
@@ -103,17 +115,25 @@ private fun Content(
     ) {
         state.config.documentData.let { file ->
             Box(modifier = Modifier.fillMaxSize()) {
-                PdfViewer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = SPACING_LARGE.dp),
-                    documentUri = file.uri,
-                    onLoadingListener = { isLoading ->
-                        onEventSend(
-                            Event.LoadingStateChanged(isLoading = isLoading)
-                        )
-                    }
-                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PdfViewerFragmentContainer(
+                        file.uri,
+                    )
+                } else {
+                    PdfViewer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = SPACING_LARGE.dp),
+                        documentUri = file.uri,
+                        onLoadingListener = { isLoading ->
+                            onEventSend(
+                                Event.LoadingStateChanged(isLoading = isLoading)
+                            )
+                        }
+                    )
+                }
+
             }
         }
     }
@@ -154,6 +174,28 @@ private fun rememberToolbarConfig(
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
+@Composable
+fun PdfViewerFragmentContainer(uri: Uri) {
+    AndroidView(
+        factory = { context ->
+            val fragmentContainer = FragmentContainerView(context)
+            val fragmentManager = (context as FragmentActivity).supportFragmentManager
+            val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+
+            val pdfFragment = PdfViewerFragment().apply {
+                documentUri = uri
+            }
+
+            fragmentTransaction.replace(android.R.id.content, pdfFragment)
+            fragmentTransaction.commit()
+            fragmentContainer
+        },
+        modifier = Modifier.fillMaxSize()
+    )
+}
+
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
 @ThemeModePreviews
 @Composable
 private fun ViewDocumentScreenPreview() {

@@ -16,6 +16,9 @@
 
 package eu.europa.ec.eudi.rqesui.presentation.router
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresExtension
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -31,6 +34,8 @@ import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@RequiresApi(Build.VERSION_CODES.R)
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
 internal fun NavGraphBuilder.sdkGraph(navController: NavController) {
     composable(
         route = SdkScreens.SelectQtsp.screenRoute,
